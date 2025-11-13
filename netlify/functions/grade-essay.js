@@ -42,20 +42,39 @@ exports.handler = async function(event, context) {
             };
         }
         
-        const systemPrompt = `你是一位专业的语文教师，专门负责批改学生作文。请按照以下要求进行批改：
+        const systemPrompt = `You are a strict but fair online course assistant, grading a final essay on fake news identification. Please evaluate the student's essay strictly according to the following rubric.
 
-批改要求：
-1. 首先给出总体评价（150-250字）
-2. 从四个维度进行评分（每个维度满分25分，总分100分）：
-   - 内容与结构：主题明确性、结构合理性、逻辑连贯性
-   - 语言表达：词汇丰富性、句式多样性、表达准确性
-   - 语法规范：语法正确性、标点规范性、文字准确性
-   - 创意与深度：观点新颖性、思考深刻性、见解独特性
+**Grading Dimensions & Weights:**
+1. Information Classification & Concept Application (20 points) - Assessing understanding of fake news typology
+2. Verification Process & Skill Demonstration (30 points) - Assessing application of SIFT method  
+3. Depth of Analysis & Critical Thinking (25 points) - Assessing multi-angle analysis of dissemination motives
+4. Personal Reflection & Course Connection (15 points) - Assessing learning internalization and metacognition
+5. Structure & Language Expression (10 points) - Assessing writing quality
 
-3. 针对每个维度给出2-3条具体改进建议
-4. 最后给出3-5条整体提升建议
+**Detailed Grading Standards:**
+- Excellent (A): 17-20/26-30/22-25/13-15/9-10 points
+- Good (B): 14-16/22-25/18-21/11-12/8 points  
+- Pass (C): 12-13/18-21/15-17/9-10/7 points
+- Fail (F): 0-11/0-17/0-14/0-8/0-6 points
 
-请用专业且鼓励的语气进行批改，既要指出问题也要肯定优点。请严格按照上述格式回复。`;
+**Special Focus on SIFT Method Application:**
+- Stop: Whether they mentioned pausing before judgment
+- Investigate the Source: Whether they examined information source and background
+- Find Better Coverage: Whether they compared multiple sources
+- Trace Claims: Whether they verified specific claims and images
+
+**Feedback Requirements:**
+1. Provide individual scores for each dimension with brief justification
+2. Identify 2-3 specific strengths with examples from the text
+3. Provide 2-3 specific improvement suggestions with actionable advice
+4. Calculate total score and provide overall evaluation
+5. Maintain constructive and encouraging tone throughout
+
+**Pass/Fail Determination:**
+- If total score ≥ 60/100: Include "Congratulations on completing this course!" at the end
+- If total score < 60/100: Clearly state they need to revise and resubmit, with specific guidance on how to improve
+
+Please analyze the following student essay based on these criteria:`;
 
         const requestBody = {
             "model": "deepseek-v3",
@@ -66,7 +85,7 @@ exports.handler = async function(event, context) {
                 },
                 {
                     "role": "user",
-                    "content": `请批改以下作文：\n\n${essay}`
+                     "content": `Please grade the following essay about fake news identification and verification using the SIFT method:\n\n${essay}`
                 }
             ],
             "stream": false
