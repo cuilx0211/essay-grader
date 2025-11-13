@@ -1,6 +1,9 @@
 exports.handler = async function(event, context) {
+    console.log('函数被调用，请求方法:', event.httpMethod);
+    
     // 只处理POST请求
     if (event.httpMethod !== 'POST') {
+        console.log('收到非POST请求:', event.httpMethod);
         return {
             statusCode: 405,
             body: JSON.stringify({ error: '只支持POST请求' })
@@ -9,6 +12,7 @@ exports.handler = async function(event, context) {
     
     try {
         const { essay } = JSON.parse(event.body);
+        console.log('收到作文，长度:', essay ? essay.length : 0);
         
         if (!essay) {
             return {
@@ -21,10 +25,20 @@ exports.handler = async function(event, context) {
         const API_KEY = process.env.QIANFAN_API_KEY;
         const APP_ID = process.env.QIANFAN_APP_ID;
         
+        console.log('API_KEY 存在:', !!API_KEY);
+        console.log('APP_ID 存在:', !!APP_ID);
+        
         if (!API_KEY || !APP_ID) {
+            console.error('环境变量缺失:', { hasApiKey: !!API_KEY, hasAppId: !!APP_ID });
             return {
                 statusCode: 500,
-                body: JSON.stringify({ error: '服务器配置错误：请检查环境变量设置' })
+                body: JSON.stringify({ 
+                    error: '服务器配置错误：请检查环境变量设置',
+                    details: {
+                        hasApiKey: !!API_KEY,
+                        hasAppId: !!APP_ID
+                    }
+                })
             };
         }
         
@@ -57,6 +71,8 @@ exports.handler = async function(event, context) {
             ],
             "stream": false
         };
+
+        console.log('准备调用千帆API...');
         
         const response = await fetch('https://qianfan.baidubce.com/v2/chat/completions', {
             method: 'POST',
@@ -68,13 +84,20 @@ exports.handler = async function(event, context) {
             body: JSON.stringify(requestBody)
         });
         
+        console.log('千帆API响应状态:', response.status);
+        
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('千帆API错误:', response.status, errorText);
-            throw new Error(`千帆API错误: ${response.status}`);
+            console.error('千帆API错误详情:', {
+                status: response.status,
+                statusText: response.statusText,
+                errorText: errorText
+            });
+            throw new Error(`千帆API错误: ${response.status} - ${response.statusText}`);
         }
         
         const data = await response.json();
+        console.log('千帆API成功响应');
         
         return {
             statusCode: 200,
@@ -86,7 +109,8 @@ exports.handler = async function(event, context) {
         return {
             statusCode: 500,
             body: JSON.stringify({ 
-                error: `处理请求时出错: ${error.message}` 
+                error: `处理请求时出错: ${error.message}`,
+                stack: error.stack
             })
         };
     }
