@@ -1,35 +1,36 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepSeek V3 智能作文批改系统</title>
+    <title>Fake News Detection - AI Essay Evaluation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-family: 'Segoe UI', 'Poppins', 'Arial', sans-serif;
         }
         
         :root {
-            --primary: #3498db;
-            --primary-dark: #2980b9;
-            --primary-light: #5dade2;
-            --secondary: #2c3e50;
-            --accent: #1abc9c;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --gradient: linear-gradient(135deg, #3498db, #2c3e50);
+        --primary: #e84393; /* 玫红色 */
+        --primary-dark: #d63031; /* 深红色，用于按钮悬停 */
+        --primary-light: #fd79a8; /* 浅玫红 */
+        --secondary: #2d3436; /* 深灰色 */
+        --accent: #ffeaa7; /* 浅黄色，用于点缀 */
+        --light: #f5f5f5; /* 浅灰色背景 */
+        --dark: #2d3436; /* 深灰色文字 */
+        --success: #00b894; /* 绿色 */
+        --warning: #fdcb6e; /* 黄色 */
+        --danger: #d63031; /* 红色 */
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --gradient: linear-gradient(135deg, #2d3436, #e84393); /* 深灰到玫红 */
         }
+
         
         body {
-            background: linear-gradient(135deg, #1a2980, #26d0ce);
+           background: var(--gradient);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -71,7 +72,7 @@
         }
         
         .header h1 {
-            font-size: 1.8rem;
+            font-size: 2rem;
             margin-bottom: 8px;
             font-weight: 700;
             position: relative;
@@ -79,15 +80,16 @@
         }
         
         .header p {
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             opacity: 0.9;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
             position: relative;
+            line-height: 1.5;
         }
         
         .header-icon {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             margin-right: 12px;
             vertical-align: middle;
         }
@@ -149,7 +151,7 @@
         textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2), inset 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.2), inset 0 2px 5px rgba(0,0,0,0.05);
         }
         
         .controls {
@@ -179,13 +181,13 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(135deg, var(--accent), var(--primary-dark));
             color: white;
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 7px 14px rgba(52, 152, 219, 0.4);
+            box-shadow: 0 7px 14px rgba(255, 109, 0, 0.4);
         }
         
         .btn-primary:active {
@@ -193,13 +195,13 @@
         }
         
         .btn-secondary {
-            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            background: linear-gradient(135deg, #78909c, #546e7a);
             color: white;
         }
         
         .btn-secondary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(149, 165, 166, 0.4);
+            box-shadow: 0 5px 10px rgba(120, 144, 156, 0.4);
         }
         
         .word-count {
@@ -263,15 +265,27 @@
         }
         
         .score-display {
-            background: linear-gradient(135deg, var(--accent), #16a085);
+            background: linear-gradient(135deg, var(--success), #66bb6a);
             color: white;
             padding: 15px;
             border-radius: 10px;
             text-align: center;
             margin-bottom: 20px;
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            box-shadow: 0 5px 15px rgba(26, 188, 156, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 200, 83, 0.3);
+        }
+        
+        .fail-display {
+            background: linear-gradient(135deg, var(--danger), #ef5350);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 23, 68, 0.3);
         }
         
         .feedback-section {
@@ -378,16 +392,25 @@
         
         .criteria-list {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 8px;
             margin-top: 8px;
         }
         
         .criteria-item {
-            padding: 6px 10px;
+            padding: 8px 10px;
             background: var(--light);
             border-radius: 5px;
             font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .criteria-item i {
+            margin-right: 8px;
+            color: var(--primary);
+            width: 16px;
+            text-align: center;
         }
         
         .api-status {
@@ -421,6 +444,39 @@
             color: #566573;
         }
         
+        .example-btn {
+            background: linear-gradient(135deg, #aa00ff, #e040fb);
+            color: white;
+        }
+        
+        .example-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(170, 0, 255, 0.4);
+        }
+        
+        .instructions {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border: 1px solid #e1e5e9;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        .instructions-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .instructions-title i {
+            margin-right: 8px;
+        }
+        
         @media (max-width: 900px) {
             .main-content {
                 flex-direction: column;
@@ -447,7 +503,7 @@
             }
             
             .header p {
-                font-size: 0.85rem;
+                font-size: 0.9rem;
             }
             
             .section-title {
@@ -468,65 +524,77 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-graduation-cap header-icon"></i>DeepSeek V3 智能作文批改系统</h1>
-            <p>基于千帆平台DeepSeek V3模型的AI智能评分与专业反馈，助力提升写作水平</p>
+            <h1><i class="fas fa-search-check header-icon"></i>Test Your Learning Outcomes Now!</h1>
+            <p>Use AI to assess your fake news identification skills and see if you have mastered the techniques of information verification!</p>
         </div>
         
         <div class="main-content">
             <div class="input-section">
                 <div class="section-title">
-                    <i class="fas fa-edit"></i>输入作文内容
+                    <i class="fas fa-edit"></i>Input Your Essay
                 </div>
-                <textarea id="essayInput" placeholder="请在此处输入或粘贴您的作文内容...（建议200-1000字以获得最佳批改效果）"></textarea>
+                
+                <div class="instructions">
+                    <div class="instructions-title">
+                        <i class="fas fa-info-circle"></i>Essay Requirements
+                    </div>
+                    <p>Write an essay about fake news identification using the SIFT method. Analyze a real controversial information case, apply the verification process, and submit your findings. Maximum 1000 words.</p>
+                </div>
+                
+                <textarea id="essayInput" placeholder="Please enter or paste your essay here... (Recommended 200-1000 words for best evaluation)"></textarea>
                 
                 <div class="controls">
                     <button class="btn btn-primary" onclick="submitEssay()">
-                        <i class="fas fa-paper-plane"></i>发送批改
+                        <i class="fas fa-paper-plane"></i>Submit for Evaluation
                     </button>
                     <button class="btn btn-secondary" onclick="clearEssay()">
-                        <i class="fas fa-eraser"></i>清空内容
+                        <i class="fas fa-eraser"></i>Clear
                     </button>
-                    <div class="word-count" id="wordCount">字数: 0</div>
+                    <button class="btn example-btn" onclick="loadExample()">
+                        <i class="fas fa-file-alt"></i>Load Example
+                    </button>
+                    <div class="word-count" id="wordCount">Words: 0</div>
                 </div>
                 
                 <div class="grading-criteria">
                     <div class="criteria-title">
-                        <i class="fas fa-clipboard-list"></i>批改维度说明
+                        <i class="fas fa-clipboard-list"></i>Grading Dimensions
                     </div>
                     <div class="criteria-list">
-                        <div class="criteria-item">📝 内容与结构 (25分)</div>
-                        <div class="criteria-item">✍️ 语言表达 (25分)</div>
-                        <div class="criteria-item">🔍 语法规范 (25分)</div>
-                        <div class="criteria-item">💡 创意与深度 (25分)</div>
+                        <div class="criteria-item"><i class="fas fa-tag"></i> Information Classification & Concept Application (20 points)</div>
+                        <div class="criteria-item"><i class="fas fa-search"></i> Verification Process & SIFT Method (30 points)</div>
+                        <div class="criteria-item"><i class="fas fa-brain"></i> Depth of Analysis & Critical Thinking (25 points)</div>
+                        <div class="criteria-item"><i class="fas fa-user-check"></i> Personal Reflection & Course Connection (15 points)</div>
+                        <div class="criteria-item"><i class="fas fa-pen-fancy"></i> Structure & Language Expression (10 points)</div>
                     </div>
                 </div>
                 
                 <div class="api-status">
                     <i class="fas fa-check-circle"></i>
                     <div>
-                        <h4>API状态: 已就绪</h4>
-                        <p>DeepSeek V3模型已准备就绪，可提供专业作文批改服务</p>
+                        <h4>API Status: Ready</h4>
+                        <p>DeepSeek V3 model is ready to evaluate your fake news detection essay</p>
                     </div>
                 </div>
             </div>
             
             <div class="output-section">
                 <div class="section-title">
-                    <i class="fas fa-chart-bar"></i>批改结果与分析
+                    <i class="fas fa-chart-bar"></i>Evaluation Results & Analysis
                 </div>
                 <div class="result-area" id="resultArea">
                     <div class="empty-state">
                         <i class="fas fa-file-alt"></i>
-                        <h3>等待作文提交</h3>
-                        <p>请在左侧输入作文内容并点击"发送批改"按钮</p>
-                        <p>AI将提供专业评分和详细改进建议</p>
+                        <h3>Waiting for Essay Submission</h3>
+                        <p>Please input your essay on the left and click "Submit for Evaluation"</p>
+                        <p>AI will provide professional scoring and detailed improvement suggestions</p>
                     </div>
                 </div>
                 
                 <div class="loading" id="loading">
                     <div class="spinner"></div>
-                    <p>DeepSeek V3正在认真批改您的作文...</p>
-                    <p>这可能需要10-30秒，请耐心等待</p>
+                    <p>DeepSeek V3 is evaluating your essay...</p>
+                    <p>This may take 10-30 seconds, please wait patiently</p>
                 </div>
             </div>
         </div>
@@ -539,10 +607,24 @@
         const loading = document.getElementById('loading');
         const wordCount = document.getElementById('wordCount');
         
+        // 示例作文
+        const exampleEssay = `In today's digital age, the proliferation of fake news has become a significant challenge. As part of this course, I've learned to apply the SIFT method to evaluate information critically.
+
+For my analysis, I chose a viral social media post claiming that a famous celebrity had made controversial political statements. The post included a manipulated image and misleading context.
+
+Using the SIFT method:
+- STOP: I first paused before sharing or believing the post, recognizing it triggered emotional reactions.
+- INVESTIGATE THE SOURCE: I researched the account that shared the information and found it was recently created with a history of spreading sensational content.
+- FIND BETTER COVERAGE: I searched reputable news sources and found no coverage of the alleged incident. The celebrity's official social media denied the claims.
+- TRACE CLAIMS: I used reverse image search to discover the original image was from a completely different context, taken years earlier.
+
+This exercise demonstrated how easily misinformation can spread and the importance of verification. The SIFT method provided a systematic approach to separate facts from fiction.`;
+
         // 更新字数统计
         essayInput.addEventListener('input', function() {
             const count = this.value.length;
-            wordCount.textContent = `字数: ${count}`;
+            const wordCountEst = Math.ceil(count / 5);
+            wordCount.textContent = `Words: ${wordCountEst}`;
         });
         
         // 提交作文进行批改
@@ -551,7 +633,12 @@
             
             // 验证输入
             if (essayText.length < 50) {
-                alert('作文内容过短，请至少输入50字以上');
+                alert('Essay is too short. Please enter at least 50 characters.');
+                return;
+            }
+            
+            if (essayText.length > 10000) {
+                alert('Essay is too long. Please limit to 1000 words (approx. 5000 characters).');
                 return;
             }
             
@@ -567,19 +654,19 @@
                 displayResult(result);
                 
             } catch (error) {
-                console.error('批改失败:', error);
+                console.error('Evaluation failed:', error);
                 resultArea.innerHTML = `
                     <div class="error-message">
-                        <h3><i class="fas fa-exclamation-triangle"></i> 批改失败</h3>
-                        <p><strong>错误信息:</strong> ${error.message}</p>
-                        <p><strong>可能的原因:</strong></p>
+                        <h3><i class="fas fa-exclamation-triangle"></i> Evaluation Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Possible reasons:</strong></p>
                         <ul>
-                            <li>网络连接问题</li>
-                            <li>后端服务暂时不可用</li>
-                            <li>请求超时</li>
-                            <li>API配置问题</li>
+                            <li>Network connection issues</li>
+                            <li>Backend service temporarily unavailable</li>
+                            <li>Request timeout</li>
+                            <li>API configuration problem</li>
                         </ul>
-                        <p>请检查网络连接或稍后重试</p>
+                        <p>Please check your connection or try again later.</p>
                     </div>
                 `;
             } finally {
@@ -613,8 +700,8 @@
             } else if (data.content) {
                 return data.content;
             } else {
-                console.error("未知的API响应结构:", data);
-                throw new Error('API返回格式异常，无法解析结果');
+                console.error("Unknown API response structure:", data);
+                throw new Error('API returned unexpected format, unable to parse result');
             }
         }
         
@@ -628,43 +715,81 @@
                 .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>'); // 包装为列表
             
             // 尝试提取分数
-            const scoreMatch = content.match(/(\d+)\s*分/);
+            const scoreMatch = content.match(/(\d+)\s*\/\s*100/);
             let scoreHtml = '';
+            let isPass = false;
+            
             if (scoreMatch) {
-                scoreHtml = `<div class="score-display"><i class="fas fa-star"></i> 综合评分: ${scoreMatch[1]}/100</div>`;
+                const score = parseInt(scoreMatch[1]);
+                isPass = score >= 60;
+                
+                if (isPass) {
+                    scoreHtml = `
+                        <div class="score-display">
+                            <i class="fas fa-trophy"></i> Course Completed: ${score}/100
+                            <div style="font-size: 1rem; margin-top: 5px;">
+                                Congratulations on completing this course!
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    scoreHtml = `
+                        <div class="fail-display">
+                            <i class="fas fa-redo"></i> Needs Revision: ${score}/100
+                            <div style="font-size: 1rem; margin-top: 5px;">
+                                Please review the feedback and resubmit your essay.
+                            </div>
+                        </div>
+                    `;
+                }
             }
             
             resultArea.innerHTML = `
                 ${scoreHtml}
                 <div class="feedback-section">
-                    <div class="feedback-title"><i class="fas fa-comment-alt"></i> 总体评价</div>
+                    <div class="feedback-title"><i class="fas fa-comment-alt"></i> Evaluation Results</div>
                     <div>${formattedContent}</div>
                 </div>
                 
+                ${isPass ? `
                 <div class="success-message">
-                    <h4><i class="fas fa-lightbulb"></i> 写作提示</h4>
-                    <p>根据AI分析，您的作文在结构和内容方面表现良好，建议在语言表达和创意深度方面继续提升。</p>
+                    <h4><i class="fas fa-award"></i> Course Completion</h4>
+                    <p>You have successfully demonstrated the ability to identify and verify fake news using the SIFT methodology. Well done!</p>
                 </div>
+                ` : `
+                <div class="error-message">
+                    <h4><i class="fas fa-lightbulb"></i> Improvement Needed</h4>
+                    <p>Your essay shows good understanding but needs improvement in some areas. Please focus on the feedback above and resubmit.</p>
+                </div>
+                `}
             `;
         }
         
         // 清空作文
         function clearEssay() {
             essayInput.value = '';
-            wordCount.textContent = '字数: 0';
+            wordCount.textContent = 'Words: 0';
             resultArea.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-file-alt"></i>
-                    <h3>等待作文提交</h3>
-                    <p>请在左侧输入作文内容并点击"发送批改"按钮</p>
-                    <p>AI将提供专业评分和详细改进建议</p>
+                    <h3>Waiting for Essay Submission</h3>
+                    <p>Please input your essay on the left and click "Submit for Evaluation"</p>
+                    <p>AI will provide professional scoring and detailed improvement suggestions</p>
                 </div>
             `;
         }
         
+        // 加载示例
+        function loadExample() {
+            essayInput.value = exampleEssay;
+            const count = exampleEssay.length;
+            const wordCountEst = Math.ceil(count / 5);
+            wordCount.textContent = `Words: ${wordCountEst}`;
+        }
+        
         // 页面加载时的初始化
         window.addEventListener('load', function() {
-            console.log("作文批改系统已加载");
+            console.log("Fake News Detection Evaluation System loaded");
         });
     </script>
 </body>
